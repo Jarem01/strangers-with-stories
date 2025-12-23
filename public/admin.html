@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Strangers with Stories</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .admin-header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .admin-header h1 {
+            font-size: 2em;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .story-item {
+            background: #f9f9f9;
+            padding: 20px;
+            border-left: 4px solid #e74c3c;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        .story-item.approved {
+            border-left-color: #27ae60;
+        }
+
+        .story-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+
+        .story-text {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .story-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9em;
+            transition: opacity 0.3s;
+        }
+
+        .btn-approve {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-approve:hover {
+            opacity: 0.9;
+        }
+
+        .btn-reject {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-reject:hover {
+            opacity: 0.9;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #f39c12;
+            color: white;
+        }
+
+        .status-approved {
+            background: #27ae60;
+            color: white;
+        }
+
+        .loading {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-header">
+        <h1>📋 Admin Dashboard</h1>
+        <p>Review and approve stories</p>
+    </div>
+
+    <div class="container">
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Total Stories</h3>
+                <div class="number" id="totalStories">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Pending Review</h3>
+                <div class="number" id="pendingStories">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Approved</h3>
+                <div class="number" id="approvedStories">0</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Pending Stories</h2>
+            <div id="pendingList" class="loading">Loading...</div>
+        </div>
+
+        <div class="section">
+            <h2>Approved Stories</h2>
+            <div id="approvedList" class="loading">Loading...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:8000/api";
+
+        async function loadAllStories() {
+            try {
+                const response = await fetch(`${API_URL}/admin/stories`);
+                if (!response.ok) throw new Error("Failed to fetch stories");
+
+                const stories = await response.json();
+
+                // Separate pending and approved
+                const pending = stories.filter(s => !s.approved);
+                const approved = stories.filter(s => s.approved);
+
+                // Update stats
+                document.getElementById("totalStories").textContent = stories.length;
+                document.getElementById("pendingStories").textContent = pending.length;
+                document.getElementById("approvedStories").textContent = approved.length;
+
+                // Render lists
+                renderStoryList("pendingList", pending, false);
+                renderStoryList("approvedList", approved, true);
+            } catch (error) {
+                console.error(error);
+                document.getElementById("pendingList").innerHTML = "<p>Error loading stories</p>";
+            }
+        }
+
+        function renderStoryList(containerId, stories, isApproved) {
+            const container = document.getElementById(containerId);
+
+            if (stories.length === 0) {
+                container.innerHTML = "<p style=\"color: #7f8c8d;\">No stories here yet.</p>";
+                return;
+            }
+
+            container.innerHTML = stories.map(story => `
+                <div class="story-item ${isApproved ? "approved" : ""}">
+                    <div class="story-meta">
+                        <div>
+                            ${story.title ? `<strong>${escapeHtml(story.title)}</strong><br>` : ''}
+                            <strong>${story.author_name || "Anonymous"}</strong>
+                            ${story.author_email ? `<small>(${story.author_email})</small>` : ""}
+                        </div>
+                        <span class="status-badge ${isApproved ? "status-approved" : "status-pending"}">
+                            ${isApproved ? "✓ Approved" : "⏳ Pending"}
+                        </span>
+                    </div>
+                    <div class="story-text">${escapeHtml(story.story_text)}</div>
+                    <div style="color: #7f8c8d; font-size: 0.9em; margin-bottom: 10px;">
+                        Category: <strong>${story.category}</strong> | Posted: ${formatDate(story.created_at)}
+                    </div>
+                    ${!isApproved ? `
+                        <div class="story-actions">
+                            <button class="btn btn-approve" onclick="approveStory(${story.id})">Approve</button>
+                            <button class="btn btn-reject" onclick="rejectStory(${story.id})">Reject</button>
+                        </div>
+                    ` : ""}
+                </div>
+            `).join("");
+        }
+
+
+        async function approveStory(storyId) {
+            try {
+                const response = await fetch(`${API_URL}/admin/stories/${storyId}/approve`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                });
+
+                if (!response.ok) throw new Error("Failed to approve");
+
+                alert("✓ Story approved!");
+                loadAllStories();
+            } catch (error) {
+                alert("Error approving story");
+                console.error(error);
+            }
+        }
+
+        async function rejectStory(storyId) {
+            if (!confirm("Are you sure you want to delete this story?")) return;
+
+            try {
+                const response = await fetch(`${API_URL}/admin/stories/${storyId}`, {
+                    method: "DELETE",
+                });
+
+                if (!response.ok) throw new Error("Failed to reject");
+
+                alert("✓ Story rejected.");
+                loadAllStories();
+            } catch (error) {
+                alert("Error rejecting story");
+                console.error(error);
+            }
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement("div");
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Load on page load
+        loadAllStories();
+
+        // Refresh every 30 seconds
+        setInterval(loadAllStories, 30000);
+    </script>
+</body>
+</html>

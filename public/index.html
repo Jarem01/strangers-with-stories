@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strangers with Stories</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 0;
+            border-bottom: 2px solid rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 0 20px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .nav-tabs button {
+            background: transparent;
+            color: #666;
+            padding: 15px 20px;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .nav-tabs button:hover {
+            color: #667eea;
+        }
+
+        .nav-tabs button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 0 0 8px 8px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .section h2 {
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 1.8em;
+        }
+
+        .section > p:first-of-type {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 1.05em;
+        }
+
+        .form-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .form-left {
+            flex: 1;
+        }
+
+        .form-right {
+            flex: 1;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            display: none;
+        }
+
+        .form-right.show {
+            display: block;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        input, textarea, select {
+            padding: 12px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 8px rgba(102, 126, 234, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 180px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        small {
+            color: #999;
+            font-size: 0.85em;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: none;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: none;
+            border: 1px solid #f5c6cb;
+        }
+
+        .story-card {
+            background: white;
+            padding: 25px;
+            border-left: 4px solid #667eea;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: box-shadow 0.3s;
+        }
+
+        .story-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+
+        .story-card h3 {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1.3em;
+        }
+
+        .story-card .story-author {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 0.95em;
+            margin-bottom: 12px;
+        }
+
+        .story-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85em;
+            color: #999;
+            margin-bottom: 12px;
+        }
+
+        .category-tag {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .story-text {
+            line-height: 1.7;
+            color: #444;
+            font-size: 1.05em;
+        }
+
+        .category-filter {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: white;
+            color: #333;
+            padding: 10px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .filter-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .loading {
+            text-align: center;
+            color: #999;
+            font-size: 1em;
+            padding: 40px;
+        }
+
+        .no-stories {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+            font-size: 1.05em;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .preview-section h4 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .preview-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            word-break: break-word;
+        }
+
+        .preview-author {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 0.95em;
+            margin-bottom: 12px;
+        }
+
+        .preview-category {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .preview-text {
+            color: #444;
+            line-height: 1.7;
+            font-size: 1em;
+            word-break: break-word;
+        }
+
+        .preview-empty {
+            color: #999;
+            font-style: italic;
+            text-align: center;
+            padding: 30px 10px;
+        }
+
+        @media (max-width: 768px) {
+            .form-container {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .nav-tabs {
+                flex-direction: column;
+            }
+
+            .nav-tabs button {
+                padding: 12px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>✨ Strangers with Stories</h1>
+        <p>Share your story. Read others. You are not alone.</p>
+    </header>
+
+    <div class="container">
+        <!-- Navigation tabs -->
+        <div class="nav-tabs">
+            <button class="nav-btn active" data-tab="submit">Share Your Story</button>
+            <button class="nav-btn" data-tab="browse">Read Stories</button>
+        </div>
+
+        <!-- SUBMIT TAB -->
+        <div id="submit" class="tab-content active">
+            <div class="section">
+                <h2>Share Your Story</h2>
+                <p>Your story will be reviewed before being shared. All submissions are anonymous unless you choose to provide your name.</p>
+                
+                <div class="success-message" id="successMsg">
+                    ✓ Thank you! Your story has been submitted for review. We'll be in touch soon.
+                </div>
+                <div class="error-message" id="errorMsg"></div>
+
+                <div class="form-container">
+                    <div class="form-left">
+                        <form id="storyForm">
+                            <div>
+                                <label for="storyTitle">Story Title (optional):</label>
+                                <input type="text" id="storyTitle" placeholder="Give your story a title..." maxlength="255">
+                            </div>
+
+                            <div>
+                                <label for="authorName">Your Name (optional):</label>
+                                <input type="text" id="authorName" placeholder="Leave blank to stay anonymous" maxlength="255">
+                            </div>
+
+                            <div>
+                                <label for="authorEmail">Email (for moderation contact only):</label>
+                                <input type="email" id="authorEmail" placeholder="example@email.com">
+                            </div>
+
+                            <div>
+                                <label for="category">Category:</label>
+                                <select id="category" required>
+                                    <option value="">-- Select a category --</option>
+                                    <option value="Love">Love</option>
+                                    <option value="Wisdom">Wisdom</option>
+                                    <option value="Regret">Regret</option>
+                                    <option value="Joy">Joy</option>
+                                    <option value="Pain">Pain</option>
+                                    <option value="Change">Change</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="storyText">Your Story (10 - 10,000 characters):</label>
+                                <textarea id="storyText" placeholder="Tell us your story..." required></textarea>
+                                <small id="charCount">0 characters</small>
+                            </div>
+
+                            <button type="submit" id="submitBtn">Submit Story</button>
+                        </form>
+                    </div>
+
+                    <div class="form-right" id="previewBox">
+                        <div class="preview-section">
+                            <h4>📋 Preview</h4>
+                            <div id="previewContent" class="preview-empty">
+                                Start typing to see your story preview here...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BROWSE TAB -->
+        <div id="browse" class="tab-content">
+            <div class="section">
+                <h2>Read Stories</h2>
+
+                <div style="margin-bottom: 20px;">
+                    <button id="randomStoryBtn" class="btn" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        🎲 Random Story
+                    </button>
+                </div>
+
+                <div class="category-filter">
+                    <button class="filter-btn active" data-category="">All Categories</button>
+                    <button class="filter-btn" data-category="Love">Love</button>
+                    <button class="filter-btn" data-category="Wisdom">Wisdom</button>
+                    <button class="filter-btn" data-category="Regret">Regret</button>
+                    <button class="filter-btn" data-category="Joy">Joy</button>
+                    <button class="filter-btn" data-category="Pain">Pain</button>
+                    <button class="filter-btn" data-category="Change">Change</button>
+                    <button class="filter-btn" data-category="Other">Other</button>
+                </div>
+
+                <div id="storiesList" class="loading">Loading stories...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:8000/api";
+
+        // ===== TAB NAVIGATION =====
+        document.querySelectorAll(".nav-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const tabName = btn.dataset.tab;
+                
+                document.querySelectorAll(".tab-content").forEach(tab => {
+                    tab.classList.remove("active");
+                });
+                document.querySelectorAll(".nav-btn").forEach(b => {
+                    b.classList.remove("active");
+                });
+
+                document.getElementById(tabName).classList.add("active");
+                btn.classList.add("active");
+
+                if (tabName === "browse") {
+                    loadStories();
+                }
+            });
+        });
+
+        // ===== LIVE PREVIEW =====
+        const titleInput = document.getElementById("storyTitle");
+        const authorInput = document.getElementById("authorName");
+        const categorySelect = document.getElementById("category");
+        const storyInput = document.getElementById("storyText");
+        const previewBox = document.getElementById("previewBox");
+        const previewContent = document.getElementById("previewContent");
+
+        function updatePreview() {
+            const title = titleInput.value.trim();
+            const author = authorInput.value.trim();
+            const category = categorySelect.value;
+            const story = storyInput.value.trim();
+
+            if (!title && !author && !category && !story) {
+                previewContent.innerHTML = '<div class="preview-empty">Start typing to see your story preview here...</div>';
+                previewBox.classList.remove("show");
+                return;
+            }
+
+            previewBox.classList.add("show");
+
+            let html = '';
+            if (title) {
+                html += `<div class="preview-title">${escapeHtml(title)}</div>`;
+            }
+            if (author) {
+                html += `<div class="preview-author">${escapeHtml(author)}</div>`;
+            }
+            if (category) {
+                html += `<div class="preview-category">${escapeHtml(category)}</div>`;
+            }
+            if (story) {
+                html += `<div class="preview-text">${escapeHtml(story)}</div>`;
+            }
+
+            previewContent.innerHTML = html || '<div class="preview-empty">No content yet</div>';
+        }
+
+        titleInput.addEventListener("input", updatePreview);
+        authorInput.addEventListener("input", updatePreview);
+        categorySelect.addEventListener("change", updatePreview);
+        storyInput.addEventListener("input", updatePreview);
+
+        // ===== FORM SUBMISSION =====
+        document.getElementById("storyForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const formData = {
+                title: document.getElementById("storyTitle").value || null,
+                author_name: document.getElementById("authorName").value || null,
+                author_email: document.getElementById("authorEmail").value || null,
+                story_text: document.getElementById("storyText").value,
+                category: document.getElementById("category").value,
+            };
+
+            if (!formData.story_text.trim()) {
+                showError("Please write a story.");
+                return;
+            }
+
+            if (formData.story_text.length < 10) {
+                showError("Story must be at least 10 characters.");
+                return;
+            }
+
+            if (!formData.category) {
+                showError("Please select a category.");
+                return;
+            }
+
+            const submitBtn = document.getElementById("submitBtn");
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Submitting...";
+
+            try {
+                const response = await fetch(`${API_URL}/stories`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(formData),
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    showError(error.detail || "Failed to submit story.");
+                    return;
+                }
+
+                showSuccess();
+                document.getElementById("storyForm").reset();
+                document.getElementById("charCount").textContent = "0 characters";
+                previewBox.classList.remove("show");
+                updatePreview();
+            } catch (error) {
+                showError("Error submitting story. Please try again.");
+                console.error(error);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Submit Story";
+            }
+        });
+
+        // ===== STORY LOADING & FILTERING =====
+        async function loadStories(category = "") {
+            const storiesList = document.getElementById("storiesList");
+            storiesList.innerHTML = '<div class="loading">Loading stories...</div>';
+
+            try {
+                let url = `${API_URL}/stories`;
+                if (category) {
+                    url += `?category=${encodeURIComponent(category)}`;
+                }
+
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("Failed to fetch stories");
+
+                const stories = await response.json();
+
+                if (stories.length === 0) {
+                    storiesList.innerHTML = '<div class="no-stories">No stories yet. Be the first to share!</div>';
+                    return;
+                }
+
+                storiesList.innerHTML = stories.map(story => `
+                    <div class="story-card">
+                        ${story.title ? `<h3>${escapeHtml(story.title)}</h3>` : ''}
+                        <div class="story-author">${escapeHtml(story.author_name || "Anonymous")}</div>
+                        <div class="story-meta">
+                            <span class="category-tag">${escapeHtml(story.category)}</span>
+                            <span>${formatDate(story.created_at)}</span>
+                        </div>
+                        <p class="story-text">${escapeHtml(story.story_text)}</p>
+                    </div>
+                `).join("");
+            } catch (error) {
+                storiesList.innerHTML = '<div class="no-stories">Error loading stories. Please try again.</div>';
+                console.error(error);
+            }
+        }
+
+        document.querySelectorAll(".filter-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const category = btn.dataset.category;
+
+                document.querySelectorAll(".filter-btn").forEach(b => {
+                    b.classList.remove("active");
+                });
+                btn.classList.add("active");
+
+                loadStories(category);
+            });
+        });
+
+        // ===== UTILITIES =====
+        function showSuccess() {
+            const msg = document.getElementById("successMsg");
+            msg.style.display = "block";
+            setTimeout(() => { msg.style.display = "none"; }, 5000);
+        }
+
+        function showError(message) {
+            const msg = document.getElementById("errorMsg");
+            msg.textContent = "❌ " + message;
+            msg.style.display = "block";
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement("div");
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Character counter
+        document.getElementById("storyText").addEventListener("input", (e) => {
+            document.getElementById("charCount").textContent = e.target.value.length + " characters";
+        });
+        
+        // ===== RANDOM STORY =====
+        document.getElementById("randomStoryBtn").addEventListener("click", async () => {
+            try {
+                const response = await fetch(`${API_URL}/stories/random`);
+                
+                if (!response.ok) {
+                    alert("No approved stories yet. Be the first to share!");
+                    return;
+                }
+
+                const story = await response.json();
+
+                // Create a single story card and display it
+                const storyHtml = `
+                    <div class="story-card">
+                        ${story.title ? `<h3>${escapeHtml(story.title)}</h3>` : ''}
+                        <div class="story-author">${escapeHtml(story.author_name || "Anonymous")}</div>
+                        <div class="story-meta">
+                            <span class="category-tag">${escapeHtml(story.category)}</span>
+                            <span>${formatDate(story.created_at)}</span>
+                        </div>
+                        <p class="story-text">${escapeHtml(story.story_text)}</p>
+                    </div>
+                `;
+
+                // Clear the stories list and show just this one
+                const storiesList = document.getElementById("storiesList");
+                storiesList.innerHTML = storyHtml + '<p style="text-align: center; color: #999; margin-top: 20px;"><em>Click "Random Story" again or use filters below to see more.</em></p>';
+            } catch (error) {
+                alert("Error fetching random story");
+                console.error(error);
+            }
+        });
+
+    </script>
+</body>
+</html>
